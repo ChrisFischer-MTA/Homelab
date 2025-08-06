@@ -1,0 +1,37 @@
+name: homelab
+services:
+  isolated-container:
+    image: strm/helloworld-http
+    networks:
+      - isolated-network
+
+  proxy-container:
+    image: httpd:latest
+    networks:
+      - proxy-server-network
+      - isolated-network
+
+  gateway-container:
+    image: owasp/modsecurity-crs:apache-alpine
+    environment:
+      - BACKEND=http://homelab-proxy-container-1
+      - BLOCKING_PARANOIA=3
+    networks:
+      - proxy-server-network
+      - external-connectivity
+    volumes:
+      - ./modsecurity/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+      - ./modsecurity/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+    ports:
+      - "8081:8080"
+
+networks:
+  isolated-network:
+    driver: bridge
+    internal: true
+  proxy-server-network:
+    driver: bridge
+    internal: true
+  external-connectivity:
+    driver: bridge
+
