@@ -10,6 +10,9 @@ services:
     networks:
       - proxy-server-network
       - isolated-network
+    volumes:
+      - ./proxy-config/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./proxy-config/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
 
   gateway-container:
     image: owasp/modsecurity-crs:apache-alpine
