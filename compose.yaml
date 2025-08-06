@@ -5,20 +5,33 @@ services:
     networks:
       - isolated-network
 
+  keycloak:
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    image: quay.io/keycloak/keycloak:latest
+    networks:
+      - proxy-server-network
+    command: start-dev
+
   proxy-container:
     image: httpd:latest
     networks:
       - proxy-server-network
       - isolated-network
+      - external-connectivity
     volumes:
       - ./proxy-config/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./proxy-config/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
-
+    entrypoint: '/bin/bash -c "apt-get update && apt-get install -y libapache2-mod-auth-openidc && httpd-foreground"'
+  # OWASP Modsec Container
   gateway-container:
     image: owasp/modsecurity-crs:apache-alpine
     environment:
       - BACKEND=http://homelab-proxy-container-1
-      - BLOCKING_PARANOIA=3
+      - BLOCKING_PARANOIA=1
+#      - ANOMALY_INBOUND=255
+#      - ANOMALY_OUTBOUND=255
     networks:
       - proxy-server-network
       - external-connectivity
@@ -26,7 +39,13 @@ services:
       - ./modsecurity/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
       - ./modsecurity/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
     ports:
-      - "8081:8080"
+      - "8080:8080"
+  # Watchtower, the preferred solution to keeping everything up to date with minimal questions asked
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 
 networks:
   isolated-network:
