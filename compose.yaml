@@ -1,25 +1,94 @@
 name: homelab
 services:
+  # Ollama API Service
+  ollama-api-intel-gpu-container:
+    image: ghcr.io/chrisfischer-mta/ollama-intelgpu-api:main
+    restart: always
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ollama-api-intel-volume:/root/.ollama
+    environment:
+      - ONEAPI_DEVICE_SELECTOR=level_zero:0
+      - IPEX_LLM_NUM_CTX=16384
+      - OLLAMA_CONTEXT_LENGTH=16384
+    networks:
+      - ollama-network
+      - external-connectivity
+  # Ollama WebUI
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    volumes:
+      - ollama-webui:/app/backend/data
+    depends_on:
+      - ollama-api-intel-gpu-container
+    environment:
+      - OLLAMA_BASE_URL=http://ollama-api-intel-gpu-container:11434
+      - ENABLE_WEBSOCKET_SUPPORT=false
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+    networks:
+      - ollama-network
+  # Journaling Web Application
+  journal-django-container:
+    image: ghcr.io/chrisfischer-mta/journaling-application:main
+    networks:
+      - journal-network
+      - signal-api-access
+    volumes:
+      - ./journalapp/.data/db.sqlite3:/app/db.sqlite3
+      - ./journalapp/.data/migrations:/app/journalmain/migrations
+    environment:
+      SECRET_KEY: ${JOURNAL_SECRET_KEY}
+      SIGNAL_NUMBER: ${JOURNAL_SIGNAL_NUMBER}
+      WEBAPP_USERNAME: ${JOURNAL_WEBAPP_USERNAME}
+      DEBUG: ${JOURNAL_DJANGO_DEBUG}
+  # Signal API
+  signal-cli-rest-api-journal:
+    container_name: signal-api
+    restart: always
+    volumes:
+      - $HOME/.local/share/signal-api:/home/.local/share/signal-cli
+    environment:
+      - MODE=native
+    image: bbernhard/signal-cli-rest-api
+    networks:
+      - signal-api-access
+
+  # Example Service
   isolated-container:
     image: strm/helloworld-http
     networks:
       - isolated-network
-
+  # Database Provider
+  postgres:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - database-connectivity
+  # Authentication/Identity Provider
   keycloak:
     environment:
-      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOT_USER}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOT_PASS}
     image: quay.io/keycloak/keycloak:latest
     networks:
       - proxy-server-network
     command: start-dev
-
   proxy-container:
     image: httpd:latest
     networks:
       - proxy-server-network
       - isolated-network
       - external-connectivity
+      - journal-network
+      - ollama-network
     volumes:
       - ./proxy-config/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./proxy-config/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
@@ -30,8 +99,8 @@ services:
     environment:
       - BACKEND=http://homelab-proxy-container-1
       - BLOCKING_PARANOIA=1
-#      - ANOMALY_INBOUND=255
-#      - ANOMALY_OUTBOUND=255
+      - ANOMALY_INBOUND=255
+      - ANOMALY_OUTBOUND=255
     networks:
       - proxy-server-network
       - external-connectivity
@@ -46,12 +115,29 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+volumes:
+  postgres_data:
+    driver: local
+  ollama-webui: {}
+  ollama-api-intel-volume: {}
 
 networks:
   isolated-network:
     driver: bridge
     internal: true
+  ollama-network:
+    driver: bridge
+    internal: true
+  journal-network:
+    driver: bridge
+    internal: true
+  signal-api-access:
+    driver: bridge
+    internal: true
   proxy-server-network:
+    driver: bridge
+    internal: true
+  database-connectivity:
     driver: bridge
     internal: true
   external-connectivity:
