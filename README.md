@@ -1,11 +1,53 @@
 # Homelab
 
+## What is this?
+Every year or so, I do a tech refresh of my homelab. For this year, I wanted to build everything from scratch and document it well enough that others can deploy my setup, change it, modify it, or what have you. This is the mono-repo dedicated to my homelab.
 
-Containers:
-gateway: Modsec WAF container, running core rule set. Passes requests onto the proxy server*.
-proxy: 
-keycloak: SSO/IDP
-watchtower: contains auto-update functionality
+## Design Considerations
+My homelab stack is designed to be a series of web-based applications. Each web-based application is intended to have some degree of isolation. As a result, web applications are classified into `groups`. All the web applications which need to talk to each other can do so via a shared network. Most web applications do not have access to the internet. All web applications are accessed after requests pass through a ModSec Web Application Firewall and then a dedicated reverse proxy. Watchtower sits on top of all docker containers and automatically updates everything.
+
+## What does it run?
+This repo currently has support for the following services:
+- Keycloak (Single Sign On/Forcing MFA across all applications)
+- Open Web UI (AI/Local LLM generation)
+- Journal Application (ChrisFischer-MTA/Journaling-Application)
+
+### What I am planning on adding:
+- Gitlab (I code things and want a local CI/CI pipeline)
+- Nextcloud (File retention)
+- RSync (File backup)
+- Jellyfin (Family video playing/retention)
+- Asciinema (Terminal Recording utility for when I do CTFs/HackTheBox)
+
+## What is the hardware behind your homelab?
+My homelab runs on a custom built PC using consumer hardware. I am currently evaluating buying 4x 20TB Spinners. If I do buy them, I will likely not buy a new case. If you are, for whatever reason, thinking about replicating my setup - I suggest a slightly larger case. I live in a very space constrained enviroment, so, I chose the smallest possible case.
+- `CPU` : `Intel i9-14900KS 3.2 GHz 24 Core`
+- `Cooler` : `ARTIC Liquid Freezer III 240mm CFM Liquid CPU Cooler`
+- `Motherboard` : `MSI MPG B760I EDGE WIFI Mini ITX LGA 1700 Motherboard`
+- `Memory` : `G.Skill Ripjaws S5 64 GB (2x32GB) DDR5 6000`
+- `GPU` : `Acer Nitro OC Arc B580 12GB Video Card`
+- `Case` : `Cooler Master MasterBox NR200P V2 Mini`
+- `Power Supply` : `Asus ROG LOKI 1000W 80+ Platinum`
+
+## Can I replicate your stuff?
+
+### ENV File
+The ENV file requires you define the following variables:
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `KEYCLOAK_ADMIN`
+- `KEYCLOAK_ADMIN_PASSWORD`
+- `KC_BOOT_USER`
+- `KC_BOOT_PASS`
+- `JOURNAL_SECRET_KEY`
+- `JOURNAL_SIGNAL_NUMBER`
+- `JOURNAL_WEBAPP_USERNAME`
+- `JOURNAL_DJANGO_DEBUG`
+
+
+
+-- Legacy Readme below. Going to work thse things into the above readme at some point.
 
 Note:
 Gateway is technically a reverse proxy itself. I could include a apache.conf file that has all the options specific to modsec. However, I don't do this here because modsec changes often enough in my experience I'd rather have the container autogenerate the configuration and have a secondary container that contains my proxy hosts.
