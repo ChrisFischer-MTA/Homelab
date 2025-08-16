@@ -42,6 +42,7 @@ services:
   journal-django-container:
     image: ghcr.io/chrisfischer-mta/journaling-application:main
     networks:
+      - ollama-network
       - journal-network
       - signal-api-access
     volumes:
@@ -116,6 +117,7 @@ services:
       - external-connectivity
       - journal-network
       - ollama-network
+      - homepage-connectivity
     volumes:
       - ./proxy-config/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./proxy-config/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
@@ -157,18 +159,21 @@ services:
       - homepage.group=Services
       - homepage.name=Watchtower
       - homepage.description=Watchtower, which auto updatess
+#    environment:
+#      - WATCHTOWER_POLL_INTERVAL=60
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     volumes:
       - ./homepage/:/app/config
       - /var/run/docker.sock:/var/run/docker.sock # pass local proxy
-    ports:
-      - 3000:3000
+#    ports:
+#      - 3000:3000
     restart: unless-stopped
     networks:
-      - external-connectivity
-#    environment:
+      - homepage-connectivity
+    environment:
+      - HOMEPAGE_ALLOWED_HOSTS=homepage-test.local:8080
 #      - LOG_LEVEL=debug
     user: root
 
@@ -195,6 +200,9 @@ networks:
     driver: bridge
     internal: true
   database-connectivity:
+    driver: bridge
+    internal: true
+  homepage-connectivity:
     driver: bridge
     internal: true
   external-connectivity:
