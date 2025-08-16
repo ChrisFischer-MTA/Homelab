@@ -15,6 +15,10 @@ services:
     networks:
       - ollama-network
       - external-connectivity
+    labels:
+      - homepage.group=APIs
+      - homepage.name=Ollama API
+      - homepage.description=Container for Ollama API
   # Ollama WebUI
   ollama-webui:
     image: ghcr.io/open-webui/open-webui:main
@@ -30,6 +34,10 @@ services:
     restart: unless-stopped
     networks:
       - ollama-network
+    labels:
+      - homepage.group=Services
+      - homepage.name=Ollama WebUI
+      - homepage.description=Container for Ollama WebUI
   # Journaling Web Application
   journal-django-container:
     image: ghcr.io/chrisfischer-mta/journaling-application:main
@@ -44,6 +52,10 @@ services:
       SIGNAL_NUMBER: ${JOURNAL_SIGNAL_NUMBER}
       WEBAPP_USERNAME: ${JOURNAL_WEBAPP_USERNAME}
       DEBUG: ${JOURNAL_DJANGO_DEBUG}
+    labels:
+      - homepage.group=Services
+      - homepage.name=Journaling App
+      - homepage.description=Container for journaling app
   # Signal API
   signal-cli-rest-api-journal:
     container_name: signal-api
@@ -55,12 +67,16 @@ services:
     image: bbernhard/signal-cli-rest-api
     networks:
       - signal-api-access
-
+      - external-connectivity
+    labels:
+      - homepage.group=APIs
+      - homepage.name=Signal API
+      - homepage.description=Container for Signal API
   # Example Service
-  isolated-container:
-    image: strm/helloworld-http
-    networks:
-      - isolated-network
+  # isolated-container:
+  #  image: strm/helloworld-http
+  #  networks:
+  #    - isolated-network
   # Database Provider
   postgres:
     image: postgres:latest
@@ -72,6 +88,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - database-connectivity
+    labels:
+      - homepage.group=Dependencies
+      - homepage.name=Postgres DB
+      - homepage.description=Postgres Database supporting journal, gitlab, keycloak
   # Authentication/Identity Provider
   keycloak:
     environment:
@@ -81,6 +101,13 @@ services:
     networks:
       - proxy-server-network
     command: start-dev
+    depends_on:
+      - postgres
+    labels:
+      - homepage.group=Dependencies
+      - homepage.name=Keycloak SSO
+      - homepage.description=Keycloak SSO utility
+
   proxy-container:
     image: httpd:latest
     networks:
@@ -93,7 +120,12 @@ services:
       - ./proxy-config/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./proxy-config/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
     entrypoint: '/bin/bash -c "apt-get update && apt-get install -y libapache2-mod-auth-openidc && httpd-foreground"'
-  # OWASP Modsec Container
+    labels:
+      - homepage.group=Services
+      - homepage.name=Proxy
+      - homepage.description=Container which provides the SSO for thes
+
+  # OWASP Modsec
   gateway-container:
     image: owasp/modsecurity-crs:apache-alpine
     environment:
@@ -109,11 +141,36 @@ services:
       - ./modsecurity/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
     ports:
       - "8080:8080"
+    depends_on:
+      - proxy-container
+    labels:
+      - homepage.group=Dependencies
+      - homepage.name=WAF
+      - homepage.description=Modsec WAF
+
   # Watchtower, the preferred solution to keeping everything up to date with minimal questions asked
   watchtower:
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - homepage.group=Services
+      - homepage.name=Watchtower
+      - homepage.description=Watchtower, which auto updatess
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    volumes:
+      - ./homepage/:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock # pass local proxy
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    networks:
+      - external-connectivity
+#    environment:
+#      - LOG_LEVEL=debug
+    user: root
 
 volumes:
   postgres_data:
