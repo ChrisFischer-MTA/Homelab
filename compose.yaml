@@ -18,7 +18,7 @@ services:
     labels:
       - homepage.group=APIs
       - homepage.name=Ollama API
-      - homepage.description=Container for Ollama API
+      - homepage.description=Ollama Backend API
   # Ollama WebUI
   ollama-webui:
     image: ghcr.io/open-webui/open-webui:main
@@ -37,7 +37,7 @@ services:
     labels:
       - homepage.group=Services
       - homepage.name=Ollama WebUI
-      - homepage.description=Container for Ollama WebUI
+      - homepage.description=Ollama WebUI
   # Journaling Web Application
   journal-django-container:
     image: ghcr.io/chrisfischer-mta/journaling-application:main
@@ -45,6 +45,7 @@ services:
       - ollama-network
       - journal-network
       - signal-api-access
+      - database-connectivity
     volumes:
       - ./journalapp/.data/db.sqlite3:/app/db.sqlite3
       - ./journalapp/.data/migrations:/app/journalmain/migrations
@@ -53,10 +54,17 @@ services:
       SIGNAL_NUMBER: ${JOURNAL_SIGNAL_NUMBER}
       WEBAPP_USERNAME: ${JOURNAL_WEBAPP_USERNAME}
       DEBUG: ${JOURNAL_DJANGO_DEBUG}
+      JOURNAL_APP_DB_NAME: ${JOURNAL_APP_DB_NAME}
+      JOURNAL_APP_DB_USER_NAME: ${JOURNAL_APP_DB_USER_NAME}
+      JOURNAL_APP_DB_PASSWORD: ${JOURNAL_APP_DB_PASSWORD}
+      JOURNAL_APP_DB_HOST: ${JOURNAL_APP_DB_HOST}
+      JOURNAL_APP_DB_PORT: ${JOURNAL_APP_DB_PORT}
+    depends_on:
+      - postgres
     labels:
       - homepage.group=Services
       - homepage.name=Journaling App
-      - homepage.description=Container for journaling app
+      - homepage.description=Journaling app
   # Signal API
   signal-cli-rest-api-journal:
     container_name: signal-api
@@ -72,7 +80,7 @@ services:
     labels:
       - homepage.group=APIs
       - homepage.name=Signal API
-      - homepage.description=Container for Signal API
+      - homepage.description=Signal API
   # Example Service
   # isolated-container:
   #  image: strm/helloworld-http
@@ -92,15 +100,22 @@ services:
     labels:
       - homepage.group=Dependencies
       - homepage.name=Postgres DB
-      - homepage.description=Postgres Database supporting journal, gitlab, keycloak
+      - homepage.description=DB supporting journal, gitlab, keycloak
   # Authentication/Identity Provider
   keycloak:
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOT_USER}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOT_PASS}
+      - KC_DB=postgres
+      - KC_DB_USERNAME=${KC_DB_USERNAME}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+      - KC_HEALTH_ENABLED=true
+      - KC_METRICS_ENABLED=true
+      - KC_DB_URL=${KC_JDBC_CON_STRING}
     image: quay.io/keycloak/keycloak:latest
     networks:
       - proxy-server-network
+      - database-connectivity
     command: start-dev
     depends_on:
       - postgres
@@ -125,7 +140,7 @@ services:
     labels:
       - homepage.group=Services
       - homepage.name=Proxy
-      - homepage.description=Container which provides the SSO for thes
+      - homepage.description=SSO frontend
 
   # OWASP Modsec
   gateway-container:
@@ -158,7 +173,7 @@ services:
     labels:
       - homepage.group=Services
       - homepage.name=Watchtower
-      - homepage.description=Watchtower, which auto updatess
+      - homepage.description=Auto updates containers
 #    environment:
 #      - WATCHTOWER_POLL_INTERVAL=60
 
