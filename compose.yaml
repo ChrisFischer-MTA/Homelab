@@ -19,6 +19,7 @@ services:
       - homepage.group=APIs
       - homepage.name=Ollama API
       - homepage.description=Ollama Backend API
+
   # Ollama WebUI
   ollama-webui:
     image: ghcr.io/open-webui/open-webui:main
@@ -38,6 +39,7 @@ services:
       - homepage.group=Services
       - homepage.name=Ollama WebUI
       - homepage.description=Ollama WebUI
+
   # Journaling Web Application
   journal-django-container:
     image: ghcr.io/chrisfischer-mta/journaling-application:main
@@ -65,6 +67,7 @@ services:
       - homepage.group=Services
       - homepage.name=Journaling App
       - homepage.description=Journaling app
+
   # Signal API
   signal-cli-rest-api-journal:
     container_name: signal-api
@@ -81,12 +84,14 @@ services:
       - homepage.group=APIs
       - homepage.name=Signal API
       - homepage.description=Signal API
+
   # Example Service
   # isolated-container:
   #  image: strm/helloworld-http
   #  networks:
   #    - isolated-network
   # Database Provider
+
   postgres:
     image: postgres:latest
     volumes:
@@ -101,6 +106,7 @@ services:
       - homepage.group=Dependencies
       - homepage.name=Postgres DB
       - homepage.description=DB supporting journal, gitlab, keycloak
+
   # Authentication/Identity Provider
   keycloak:
     environment:
@@ -133,6 +139,7 @@ services:
       - journal-network
       - ollama-network
       - homepage-connectivity
+#      - garmin-connectivity
     volumes:
       - ./proxy-config/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./proxy-config/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
@@ -192,6 +199,29 @@ services:
 #      - LOG_LEVEL=debug
     user: root
 
+  # Test backup service
+  #backup-service:
+  #  image: ubuntu:latest
+  #  restart: unless-stopped
+  #  networks:
+  #    - external-connectivity
+  #  entrypoint: /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -qq --force-yes cron && service cron start && echo '* * * * * echo 'test' >> /tmp/l.log' > /var/spool/cron/crontabs/root && sleep 60000" 
+#    volumes:
+#      - ./backup/root:/etc/crontabs/root
+  #  labels:
+  #    - homepage.group=Dependencies
+  #    - homepage.name=Ubuntu Backup
+  #    - homepage.description=Has mounts to data, automatically queues data for backups
+
+#  garmin-connector:
+#    image: ghcr.io/chrisfischer-mta/garmin-connector:main
+#    restart: always
+#    environment:
+#      - DEBUG=False
+#    volumes:
+#      - ./data:/opt/garmin/data
+#      - ./GarminConnectConfig.json:/opt/garmin/GarminConnectConfig.json
+
 volumes:
   postgres_data:
     driver: local
@@ -220,6 +250,9 @@ networks:
   homepage-connectivity:
     driver: bridge
     internal: true
+#  garmin-connectivity:
+#    driver: bridge
+#    internal: true
   external-connectivity:
     driver: bridge
 
