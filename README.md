@@ -33,17 +33,37 @@ My homelab runs on a custom built PC using consumer hardware. I am currently eva
 
 ### ENV File
 The ENV file requires you define the following variables:
-- `POSTGRES_DB`
-- `POSTGRES_USER`
-- `POSTGRES_PASSWORD`
-- `KEYCLOAK_ADMIN`
-- `KEYCLOAK_ADMIN_PASSWORD`
-- `KC_BOOT_USER`
-- `KC_BOOT_PASS`
-- `JOURNAL_SECRET_KEY`
-- `JOURNAL_SIGNAL_NUMBER`
-- `JOURNAL_WEBAPP_USERNAME`
-- `JOURNAL_DJANGO_DEBUG`
+```
+# Variables for the postgres bootstrap user
+POSTGRES_DB
+POSTGRES_USER
+POSTGRES_PASSWORD
+
+# Keycloak Bootstrap Variables
+KEYCLOAK_ADMIN
+KEYCLOAK_ADMIN_PASSWORD
+KC_BOOT_USER
+KC_BOOT_PASS
+KC_DB_USERNAME
+KC_DB_PASSWORD
+KC_JDBC_CON_STRING
+
+# Journal App Variables
+JOURNAL_SECRET_KEY
+JOURNAL_SIGNAL_NUMBER
+JOURNAL_WEBAPP_USERNAME
+JOURNAL_DJANGO_DEBUG
+JOURNAL_APP_DB_NAME
+JOURNAL_APP_DB_USER_NAME
+JOURNAL_APP_DB_PASSWORD
+JOURNAL_APP_DB_HOST
+JOURNAL_APP_DB_PORT
+
+NEXTCLOUD_POSTGRES_DB
+NEXTCLOUD_POSTGRES_DB_USER
+NEXTCLOUD_POSTGRES_DB_PASSWORD
+NEXTCLOUD_POSTGRES_DB_HOST
+```
 
 ### Setup Guide
 
@@ -131,3 +151,5 @@ Known cron needs:
 
 backup-service: cron commands
 
+Nextcloud requires a special configuration for the gateway to allow bigger requests such that 
+todo: add gpu acceleration for jellyfin
