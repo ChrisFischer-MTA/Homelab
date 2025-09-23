@@ -75,7 +75,7 @@ Log in with the user you created, scope to the master realm. Add a DNS record fo
 Create a new user client, call it `journaling-app-client`. Give it a root URL of `http://<external journal DNS>:8080/` and a home URL of `http://<external journal DNS>:8080/admin`. Tick `Client Authentication` and `Authorization`. Ensure client authenticator is set to `Client Id and Secret`. Set the vhost to have the ClientID and ClientName.
 
 ##### Setting up Elastic for Nextcloud
-Elastic will spit a ton of errors on first start. Drop into the container using `docker exec -it homelab-elastic-1 bash` and then run the following commands to generate the credentials: `/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic` and `/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana`. You should get output roughly matching the following:
+Elastic will spit a ton of errors on first start. Drop into the container using `docker exec -it homelab-elastic-1 bash` and then run the following command to generate the credentials: `/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic`. You should get output roughly matching the following:
 
 ```
 [elasticsearch@3e57d89774f6 ~]$ /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
@@ -89,11 +89,7 @@ Please confirm that you would like to continue [y/N]y
 Password for the [elastic] user successfully reset.
 New value: V1uyyr==qs1xN-y*hRPu
 ```
-and
-```
-[elasticsearch@3e57d89774f6 ~]$ /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
-eyJ2ZXIiOiI4LjE0LjAiLCJhZHIiOlsiMTcyLjMwLjAuMjo5MjAwIl0sImZnciI6ImM2YTUzNzFlYTVlZjk5NzdkY2NlNzg4ZTUwZWQ1NDQ4MDI4OTRjZDNjZjIzNWVjYjIyNGZiNjdiYTk4MzNkMWMiLCJrZXkiOiJoUkZrYnBrQm96bnpoZ09LcWRKSzpiUGpLbkNLcndhanZTbXFyb2NwQ093In0=
-```
+
 
 
 You can test it using the following example:
@@ -115,6 +111,7 @@ Drop into nextcloud bash
 `php occ fulltextsearch:index`
 
 Exit out
+Now, remove the internet connection from docker compose
 
 
 -- Legacy Readme below. Going to work thse things into the above readme at some point.
@@ -129,5 +126,8 @@ Proxy:
 Notes:
  - The internal and external DNS resolution must work due to the way IDC is configured.
  
- Known cron needs:
+Known cron needs:
 `http://nextcloud-test:8080/cron.php`
+
+backup-service: cron commands
+
