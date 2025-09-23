@@ -253,10 +253,30 @@ services:
       - nextcloud-data:/mnt/nextcloud
       - postgres_data:/mnt/postgres
       - esdata01:/mnt/elasticdata/
+      - jellyfin-data:/mnt/jellyfinmedia
     labels:
       - homepage.group=Dependencies
       - homepage.name=Ubuntu Backup
       - homepage.description=Has mounts to data, automatically queues data for backups
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    networks:
+        - jellyfin-network
+        - external-connectivity
+    volumes:
+      #- /path/to/config:/config
+      #- /path/to/cache:/cache
+      - jellyfin-data:/media
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+#    environment:
+#      - JELLYFIN_PublishedServerUrl=http://example.com
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+
 
 #  garmin-connector:
 #    image: ghcr.io/chrisfischer-mta/garmin-connector:main
@@ -274,6 +294,7 @@ volumes:
   ollama-api-intel-volume: {}
   nextcloud-data: {}
   esdata01: {}
+  jellyfin-data: {}
 
 networks:
   isolated-network:
@@ -289,6 +310,9 @@ networks:
     driver: bridge
     internal: true
   signal-api-access:
+    driver: bridge
+    internal: true
+  jellyfin-network:
     driver: bridge
     internal: true
   proxy-server-network:
