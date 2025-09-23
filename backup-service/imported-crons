@@ -1,1 +1,1 @@
-* * * * * curl http://nextcloud-test:8080/cron.php
+* * * * * curl http://homelab-nextcloud-1/cron.php
