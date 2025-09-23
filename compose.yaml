@@ -163,6 +163,7 @@ services:
     volumes:
       - ./modsecurity/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
       - ./modsecurity/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+      - ./modsecurity/modsecurity.conf:/etc/modsecurity.d/modsecurity.conf
     ports:
       - "8080:8080"
     depends_on:
@@ -203,6 +204,7 @@ services:
     image: nextcloud:latest
     volumes:
       - nextcloud-data:/var/www/html
+#      - ./nextcloud/nextcloud-fulltext-elasticsearch-worker.service:/etc/systemd/system/nextcloud-fulltext-elasticsearch-worker.service
 #      - ./nextcloud/app-hooks/before-starting:/docker-entrypoint-hooks.d/before-starting
     restart: unless-stopped
     networks:
@@ -210,6 +212,7 @@ services:
       - database-connectivity
       - proxy-server-network
       - external-connectivity
+      - elastic-network
     environment:
       - POSTGRES_DB=${NEXTCLOUD_POSTGRES_DB}
       - POSTGRES_USER=${NEXTCLOUD_POSTGRES_DB_USER}
@@ -218,19 +221,42 @@ services:
       - TRUSTED_PROXIES=["172.16.0.0/12"]
 #    entrypoint: /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y tesseract-ocr-eng ocrmypdf && /entrypoint.sh"
 
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4 # Elastic doesn't support the latest tag for some unhelpful reason
+    networks:
+      - elastic-network
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+      - ./elastic/certs:/usr/share/elasticsearch/config/certs
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1GB
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+#      - xpack.security.http.ssl.enabled=true
+#      - xpack.security.transport.ssl.enabled=true
+
   # Test backup service
-  #backup-service:
-  #  image: ubuntu:latest
-  #  restart: unless-stopped
-  #  networks:
-  #    - external-connectivity
-  #  entrypoint: /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -qq --force-yes cron && service cron start && echo '* * * * * echo 'test' >> /tmp/l.log' > /var/spool/cron/crontabs/root && sleep 60000" 
-#    volumes:
-#      - ./backup/root:/etc/crontabs/root
-  #  labels:
-  #    - homepage.group=Dependencies
-  #    - homepage.name=Ubuntu Backup
-  #    - homepage.description=Has mounts to data, automatically queues data for backups
+  backup-service:
+    image: python:3.13-slim
+    restart: unless-stopped
+    networks:
+      - external-connectivity
+      - nextcloud-network
+    entrypoint: /bin/bash -c "apt-get update && apt-get install -y cron curl && crontab /etc/cron.d/imported-crons && cron -f"
+    volumes:
+      - ./backup-service/imported-crons:/etc/cron.d/imported-crons
+      - nextcloud-data:/mnt/nextcloud
+      - postgres_data:/mnt/postgres
+      - esdata01:/mnt/elasticdata/
+    labels:
+      - homepage.group=Dependencies
+      - homepage.name=Ubuntu Backup
+      - homepage.description=Has mounts to data, automatically queues data for backups
 
 #  garmin-connector:
 #    image: ghcr.io/chrisfischer-mta/garmin-connector:main
@@ -247,12 +273,16 @@ volumes:
   ollama-webui: {}
   ollama-api-intel-volume: {}
   nextcloud-data: {}
+  esdata01: {}
 
 networks:
   isolated-network:
     driver: bridge
     internal: true
   ollama-network:
+    driver: bridge
+    internal: true
+  elastic-network:
     driver: bridge
     internal: true
   journal-network:
