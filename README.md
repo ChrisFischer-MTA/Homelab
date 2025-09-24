@@ -151,5 +151,6 @@ Known cron needs:
 
 backup-service: cron commands
 
-Nextcloud requires a special configuration for the gateway to allow bigger requests such that 
+Nextcloud requires a special configuration for the gateway to allow bigger requests such that things work
+recognize and maps
 todo: add gpu acceleration for jellyfin
