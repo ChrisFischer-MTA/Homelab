@@ -7,6 +7,8 @@ Every year or so, I do a tech refresh of my homelab. For this year, I wanted to 
 My homelab stack is designed to be a series of web-based applications. Each web-based application is intended to have some degree of isolation. As a result, web applications are classified into `groups`. All the web applications which need to talk to each other can do so via a shared network. Most web applications do not have access to the internet. All web applications are accessed after requests pass through a ModSec Web Application Firewall and then a dedicated reverse proxy. Watchtower sits on top of all docker containers and automatically updates everything.
 
 ## What does it run?
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/cb37b534-eb8b-48e0-83b6-2fd7310088cc" />
+
 This repo currently has support for the following services:
 - Keycloak (Single Sign On/Forcing MFA across all applications)
 - Open Web UI (AI/Local LLM generation)
