@@ -11,13 +11,14 @@ This repo currently has support for the following services:
 - Keycloak (Single Sign On/Forcing MFA across all applications)
 - Open Web UI (AI/Local LLM generation)
 - Journal Application (ChrisFischer-MTA/Journaling-Application)
+- Jellyfin (Family video playing/retention)
+- Nextcloud (File retention and automatic syncing, photo tagging, full text search through Elastic)
 
 ### What I am planning on adding:
 - Gitlab (I code things and want a local CI/CI pipeline)
-- Nextcloud (File retention)
 - RSync (File backup)
-- Jellyfin (Family video playing/retention)
 - Asciinema (Terminal Recording utility for when I do CTFs/HackTheBox)
+- Fine grained ModSec rules (Right now, modsec runs in a logging capacity but I want to do tuning so that I can turn it on to enforce).
 
 ## What is the hardware behind your homelab?
 My homelab runs on a custom built PC using consumer hardware. I am currently evaluating buying 4x 20TB Spinners. If I do buy them, I will likely not buy a new case. If you are, for whatever reason, thinking about replicating my setup - I suggest a slightly larger case. I live in a very space constrained enviroment, so, I chose the smallest possible case.
@@ -69,7 +70,7 @@ NEXTCLOUD_POSTGRES_DB_HOST
 
 #### First run: Setting up database users
 
-First, create the keycloak database and the database user. Replace with your own password
+First, create the keycloak database and the database user. Replace with your own password. The SQL snippets are below. Ensure that the usernames and passwords you add match what's in your enviroment variables.
 ```postgresql
 create database journalingapp;
 create user journaldbuser with encrypted password 'journaldbpass';
@@ -132,6 +133,14 @@ Drop into nextcloud bash
 
 Exit out
 Now, remove the internet connection from docker compose
+
+
+
+
+
+
+
+
 
 
 -- Legacy Readme below. Going to work thse things into the above readme at some point.
