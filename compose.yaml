@@ -220,6 +220,11 @@ services:
       - POSTGRES_HOST=${NEXTCLOUD_POSTGRES_DB_HOST}
       - TRUSTED_PROXIES=["172.16.0.0/12"]
 #    entrypoint: /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y tesseract-ocr-eng ocrmypdf && /entrypoint.sh"
+    labels:
+      - homepage.group=Services
+      - homepage.name=Nextcloud
+      - homepage.description=Nextcloud is used for backing up files
+
 
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4 # Elastic doesn't support the latest tag for some unhelpful reason
@@ -239,6 +244,10 @@ services:
       - xpack.security.enabled=true
 #      - xpack.security.http.ssl.enabled=true
 #      - xpack.security.transport.ssl.enabled=true
+    labels:
+      - homepage.group=Dependencies
+      - homepage.name=Elastic Container
+      - homepage.description=Elastic container which is used for full text search support in nextcloud.
 
   # Test backup service
   backup-service:
@@ -256,7 +265,7 @@ services:
       - jellyfin-data:/mnt/jellyfinmedia
     labels:
       - homepage.group=Dependencies
-      - homepage.name=Ubuntu Backup
+      - homepage.name=Python Backup
       - homepage.description=Has mounts to data, automatically queues data for backups
 
   jellyfin:
@@ -275,6 +284,10 @@ services:
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    labels:
+      - homepage.group=Services
+      - homepage.name=Jellyfin Media Player
+      - homepage.description=Jellyfin Media Player
 
 
 
