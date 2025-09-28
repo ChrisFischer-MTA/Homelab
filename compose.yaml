@@ -93,9 +93,9 @@ services:
   # Database Provider
 
   postgres:
-    image: postgres:latest
+    image: postgres:18-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
