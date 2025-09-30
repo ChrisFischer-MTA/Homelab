@@ -165,3 +165,8 @@ backup-service: cron commands
 Nextcloud requires a special configuration for the gateway to allow bigger requests such that things work
 recognize and maps
 todo: add gpu acceleration for jellyfin
+
+
+Host configuration:
+zfs pool
+ /lib/systemd/system/docker.service  ExecStart=/usr/bin/dockerd --data-root /new_location/ -H fd:// --containerd=/run/containerd/containerd.sock
