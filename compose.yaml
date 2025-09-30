@@ -275,7 +275,7 @@ services:
         - jellyfin-network
         - external-connectivity
     volumes:
-      #- /path/to/config:/config
+      - jellyfin-config:/config
       #- /path/to/cache:/cache
       - jellyfin-data:/media
     restart: 'unless-stopped'
@@ -311,6 +311,7 @@ volumes:
   nextcloud-data: {}
   esdata01: {}
   jellyfin-data: {}
+  jellyfin-config: {}
 
 networks:
   isolated-network:
