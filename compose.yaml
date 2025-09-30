@@ -256,7 +256,7 @@ services:
     networks:
       - external-connectivity
       - nextcloud-network
-    entrypoint: /bin/bash -c "apt-get update && apt-get install -y cron curl && crontab /etc/cron.d/imported-crons && cron -f"
+    entrypoint: /bin/bash -c "apt-get update && apt-get install -y cron curl rclone && crontab /etc/cron.d/imported-crons && cron -f"
     volumes:
       - ./backup-service/imported-crons:/etc/cron.d/imported-crons
       - nextcloud-data:/mnt/nextcloud
