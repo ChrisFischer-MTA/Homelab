@@ -278,6 +278,8 @@ services:
       #- /path/to/cache:/cache
       - jellyfin-data:/media
     restart: 'unless-stopped'
+    group_add:
+      - '993'
     # Optional - alternative address used for autodiscovery
 #    environment:
 #      - JELLYFIN_PublishedServerUrl=http://example.com
