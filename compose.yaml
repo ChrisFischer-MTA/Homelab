@@ -265,6 +265,7 @@ services:
       - esdata01:/mnt/elasticdata/
       - jellyfin-data:/mnt/jellyfinmedia
       - ./.rclone.conf:/root/.config/rclone/rclone.conf
+      - pihole-config:/mnt/pihole
     labels:
       - homepage.group=Dependencies
       - homepage.name=Python Backup
