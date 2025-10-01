@@ -278,7 +278,7 @@ services:
         - external-connectivity
     volumes:
       - jellyfin-config:/config
-      #- /path/to/cache:/cache
+      - jellyfin-cache:/cache
       - jellyfin-data:/media
     restart: 'unless-stopped'
     group_add:
@@ -332,6 +332,7 @@ volumes:
   esdata01: {}
   jellyfin-data: {}
   jellyfin-config: {}
+  jellyfin-cache: {}
   pihole-config: {}
 
 networks:
