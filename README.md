@@ -170,6 +170,7 @@ Nextcloud requires a special configuration for the gateway to allow bigger reque
 recognize and maps
 todo: add gpu acceleration for jellyfin
 
+Nextcloud requires you adding a trusted domain and setting the reverse proxy as a trusted proxy
 
 Host configuration:
 zfs pool
