@@ -176,3 +176,5 @@ Host configuration:
 zfs pool
  /lib/systemd/system/docker.service  ExecStart=/usr/bin/dockerd --data-root /new_location/ -H fd:// --containerd=/run/containerd/containerd.sock
 Disable DNS server (https://www.linuxuprising.com/2020/07/ubuntu-how-to-free-up-port-53-used-by.html)
+hwe kernel
+https://dgpu-docs.intel.com/driver/client/overview.html
