@@ -178,3 +178,5 @@ zfs pool
 Disable DNS server (https://www.linuxuprising.com/2020/07/ubuntu-how-to-free-up-port-53-used-by.html)
 hwe kernel
 https://dgpu-docs.intel.com/driver/client/overview.html
+
+configure the buckets and cron job
