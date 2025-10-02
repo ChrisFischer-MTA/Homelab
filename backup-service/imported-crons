@@ -1,1 +1,2 @@
 * * * * * curl http://homelab-nextcloud-1/cron.php
+0 3 */7 * * rclone sync -M /mnt/nextcloud/data/ encrypted-backup-bucket-name:nextcloud/data/
