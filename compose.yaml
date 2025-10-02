@@ -280,6 +280,8 @@ services:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
       - jellyfin-data:/media
+    ports:
+      - "8096:8096/tcp"
     restart: 'unless-stopped'
     group_add:
       - '993'
